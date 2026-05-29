@@ -1,0 +1,21 @@
+services:
+  matcher:
+    build:
+      context: .
+      network: host
+      dockerfile_inline: |
+        FROM python:3.12-slim
+
+        RUN pip install --no-cache-dir opencv-python-headless==4.10.0.84 numpy
+
+        WORKDIR /app
+        COPY match.py .
+
+        ENTRYPOINT ["python", "match.py"]
+    volumes:
+      - ./template.png:/app/template.png
+      - ..:/proj_root/
+    environment:
+      SCREENSHOT: demand.png
+      TEMPLATE:   template.png
+      THRESHOLD:  "0.9"

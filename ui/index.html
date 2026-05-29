@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wolt Delivery Demand Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#17201c",
+              muted: "#67736d",
+              paper: "#fffefa",
+              field: "#f4f1ea",
+              line: "#ddd6cb",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .timeline-scroll {
+        scrollbar-gutter: stable;
+      }
+
+      .timeline-scroll::-webkit-scrollbar {
+        height: 14px;
+      }
+
+      .timeline-scroll::-webkit-scrollbar-track {
+        background: #ebe3d7;
+      }
+
+      .timeline-scroll::-webkit-scrollbar-thumb {
+        background: #746c60;
+        border: 3px solid #ebe3d7;
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+  <body class="min-w-[320px] bg-field text-ink">
+    <main class="min-h-screen w-full px-4 py-5 sm:px-6 lg:px-8">
+      <header class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h1 class="text-xl font-black uppercase tracking-widest text-muted sm:text-2xl">Wolt Delivery Demand Monitor</h1>
+        </div>
+        <label class="grid gap-2 text-sm font-black text-muted lg:w-64">
+          <span>Selected day</span>
+          <select id="daySelect" class="h-12 rounded-lg border border-line bg-paper px-3 text-ink shadow-sm outline-none"></select>
+        </label>
+      </header>
+
+      <section class="overflow-hidden rounded-lg border border-line bg-paper shadow-sm">
+        <div class="border-b border-line px-4 py-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <strong id="dateTitle" class="text-base font-black">--</strong>
+            <span class="text-xs font-black uppercase text-muted">Horizontal scroll</span>
+          </div>
+        </div>
+
+        <div class="timeline-scroll w-full overflow-x-scroll overflow-y-hidden pb-3">
+          <div id="timeline" class="relative min-w-[2200px]">
+            <div id="axis" class="sticky top-0 z-30 grid border-b border-line bg-paper/95 backdrop-blur"></div>
+            <div id="lanes"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
