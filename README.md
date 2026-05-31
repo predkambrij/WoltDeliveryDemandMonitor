@@ -147,17 +147,62 @@ y_top=600
 confidence=0.966
 ```
 
-## Summary (phone2 has values shifted by 3)
+##  phone 2 Starts in
+
+## level 4 (medium - lowest)
+```bash
+docker compose -f now-matcher/docker-compose.yml --progress=quiet run --rm -e SCREENSHOT=sslog/demand_2026-05-31_11-12-19.png matcher
+y_top=584
+confidence=0.966
 ```
-603 or 600 - level 9
-628 or 625 - level 8
-653 or 650 - level 7
-679 or 676 - level 6
-704 or 701 - level 5
-729 or 726 - level 4
-754 or 751 - level 3
-779 or 776 - level 2
-805 or 802 - level 1
-830 or 827 - level 0
+
+## level 5 (medium - medium)
+```bash
+docker compose -f now-matcher/docker-compose.yml --progress=quiet run --rm -e SCREENSHOT=sslog/demand_2026-05-31_11-07-09.png matcher
+y_top=559
+confidence=0.958
+```
+
+## level 6 (medium - highest)
+```bash
+docker compose -f now-matcher/docker-compose.yml --progress=quiet run --rm -e SCREENSHOT=sslog/demand_2026-05-31_11-18-30.png matcher
+y_top=534
+confidence=0.947
+```
+
+## level 7 (high - lowest)
+```bash
+docker compose -f now-matcher/docker-compose.yml --progress=quiet run --rm -e SCREENSHOT=sslog/demand_2026-05-31_11-27-48.png matcher
+y_top=508
+confidence=0.955
+```
+
+## level 8 (high - medium)
+```bash
+docker compose -f now-matcher/docker-compose.yml --progress=quiet run --rm -e SCREENSHOT=sslog/demand_2026-05-31_12-01-51.png matcher
+y_top=490
+confidence=0.963
+```
+
+## level 9 (high - highest)
+```bash
+docker compose -f now-matcher/docker-compose.yml --progress=quiet run --rm -e SCREENSHOT=sslog/demand_2026-05-31_12-12-11.png matcher
+y_top=489
+confidence=0.966
+```
+
+
+## Summary (phone2 has values shifted by 3, Starts in shifts by 142)
+```
+603 or 600 or 489 - level 9 (111)
+628 or 625 or 490 - level 8 (135)
+653 or 650 or 508 - level 7 (142)
+679 or 676 or 534 - level 6 (142)
+704 or 701 or 559 - level 5 (142)
+729 or 726 or 584 - level 4 (142)
+754 or 751 or 609 - level 3 (xxx)
+779 or 776 or 634 - level 2 (xxx)
+805 or 802 or 660 - level 1 (xxx)
+830 or 827 or 685 - level 0 (xxx)
 ```
 
