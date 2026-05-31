@@ -45,8 +45,8 @@ Easiest way is to setup that through cron
 ```bash
 cat /etc/cron.d/user
 0 6 * * *   user /usr/bin/tmux new-session -d -s script_sh "cd /home/user/devbox_pr/repos/WoltDeliveryDemandMonitor; ./script.sh main_with_start_and_end"
-59 5 * * *   user /usr/bin/tmux new-session -d -s script_sh "cd /home/user/devbox_pr/repos/WoltDeliveryDemandMonitor; ./weather.sh daily"
-46 3 * * *   user /usr/bin/tmux new-session -d -s script_sh "cd /home/user/devbox_pr/repos/WoltDeliveryDemandMonitor; ./weather.sh main_with_start_and_end"
+59 5 * * *   user /usr/bin/tmux new-session -d -s weather_sh_daily "cd /home/user/devbox_pr/repos/WoltDeliveryDemandMonitor; ./weather.sh daily"
+46 3 * * *   user /usr/bin/tmux new-session -d -s weather_sh "cd /home/user/devbox_pr/repos/WoltDeliveryDemandMonitor; ./weather.sh main_with_start_and_end"
 ```
 
 # now-matcher
