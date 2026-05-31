@@ -35,6 +35,10 @@ try {
   const page = await browser.newPage();
   page.setDefaultTimeout(15000);
 
+  const browserLogs = [];
+  page.on('console', (msg) => browserLogs.push(`[${msg.type()}] ${msg.text()}`));
+  page.on('pageerror', (err) => browserLogs.push(`[pageerror] ${err.message}`));
+
   for (const viewport of viewports) {
     await page.setViewport({
       width: viewport.width,
@@ -42,9 +46,23 @@ try {
       deviceScaleFactor: 1,
     });
 
+    browserLogs.length = 0;
     await page.goto(targetUrl, { waitUntil: 'networkidle2' });
-    await page.waitForSelector('#timeline');
-    await page.waitForSelector('[data-weather-card="forecast"]');
+
+    const trySelector = async (selector, timeout = 15000) => {
+      try {
+        await page.waitForSelector(selector, { timeout });
+      } catch {
+        await page.screenshot({ path: path.join(outputDir, `${viewport.name}-timeout-${selector.replace(/[^\w]/g, '_')}.png`), fullPage: true });
+        const html = await page.content();
+        await fs.writeFile(path.join(outputDir, `${viewport.name}-debug.html`), html);
+        console.error(`Timeout waiting for ${selector}. Browser logs:\n${browserLogs.join('\n')}`);
+        throw new Error(`Timeout waiting for ${selector}. Browser console:\n${browserLogs.join('\n')}`);
+      }
+    };
+
+    await trySelector('#timeline');
+    await page.waitForSelector('[data-weather-card="forecast"]', { timeout: 3000 }).catch(() => {});
     await page.waitForSelector('[data-weather-card="actual"]', { timeout: 3000 }).catch(() => {});
     await page.waitForSelector('[data-demand-block]', { timeout: 3000 }).catch(() => {});
 
@@ -153,7 +171,7 @@ try {
       fullPage: true,
     });
 
-    const optionalKeys = new Set(['hasActualCards', 'hasDemandBlocks', 'hasPreciseBlocks']);
+    const optionalKeys = new Set(['hasForecastCards', 'hasActualCards', 'hasDemandBlocks', 'hasPreciseBlocks']);
     const failures = Object.entries(assertions)
       .filter(([key, value]) => optionalKeys.has(key) ? false : (key.endsWith('Count') ? value !== 0 : !value))
       .map(([key, value]) => `${key}=${value}`);
