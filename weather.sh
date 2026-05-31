@@ -65,20 +65,37 @@ function log_sun_events() {
 }
 
 function main() {
-    local mode="${1:-}"
-
-    if [[ "$mode" == "daily" ]]; then
-        log_hourly_forecast
-        log_sun_events
-    elif [[ "$mode" == "mon" ]]; then
-        while true; do
-            log_current_weather
-            sleep 15m
-        done
-    else
-        printf 'Usage: %s <daily|mon>\n' "$0" >&2
-        exit 1
-    fi
+    while true; do
+        log_current_weather
+        sleep 15m
+    done
 }
 
-main "$@"
+function daily() {
+        log_hourly_forecast
+        log_sun_events
+}
+
+endTime="tomorrow 02:20"
+
+function main_with_start_and_end() {
+    local end_time=$(date -d "$endTime" +%s)
+
+    while true; do
+        log_current_weather
+
+        # if time is due, break from the loop
+        if (( $(date +%s) >= end_time )); then
+            break
+        fi
+
+        sleep 15m
+    done
+}
+
+if [[ $# -gt 0 ]]; then
+    "$1"
+else
+    printf 'Usage: %s <daily|main|main_with_start_and_end>\n' "$0" >&2
+    exit 1
+fi

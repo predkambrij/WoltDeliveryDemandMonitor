@@ -9,6 +9,7 @@ Possible improvements:
 
 Other notes:
 - UI and UI test are mostly vibe coded, so code quality is slightly lower than what's needed to receive the Nobel price.
+- App "Keep Screen On" will keep the screen awake
 
 UI screenshot for a busy hot Saturday:
 ![screenshot](docs/Screenshot_2026-05-31_01-14-32.png)
@@ -17,7 +18,7 @@ UI screenshot for a busy hot Saturday:
 
 # Tools needed on host system (tested on ubuntu 26.04)
 ```bash
-sudo apt install -y tesseract-ocr imagemagick adb
+sudo apt install -y tesseract-ocr imagemagick adb tmux
 # ubuntu 26.04
 sudo apt install android-udev-rules
 # ubuntu 24.04
@@ -36,7 +37,16 @@ adb devices # confirm on the phone
 # needed to run once a day, to get sunrise, sunset and hourly weather forecast for current day
 ./weather.sh daily
 # periodic collection of current weather (15 min increments)
-./weather.sh mon
+./weather.sh main
+```
+
+# Cron
+Easiest way is to setup that through cron
+```bash
+cat /etc/cron.d/user
+0 6 * * *   user /usr/bin/tmux new-session -d -s script_sh "cd /home/user/devbox_pr/repos/WoltDeliveryDemandMonitor; ./script.sh main_with_start_and_end"
+59 5 * * *   user /usr/bin/tmux new-session -d -s script_sh "cd /home/user/devbox_pr/repos/WoltDeliveryDemandMonitor; ./weather.sh daily"
+46 3 * * *   user /usr/bin/tmux new-session -d -s script_sh "cd /home/user/devbox_pr/repos/WoltDeliveryDemandMonitor; ./weather.sh main_with_start_and_end"
 ```
 
 # now-matcher

@@ -15,6 +15,12 @@ logMatchFile="$scriptDir/logs/log_match_${runTime}.log"
 last_ocr_demand_amount=""
 last_template_match=""
 
+startTime="06:40"
+endTime="tomorrow 01:15"
+# test
+#startTime="14:02"
+#endTime="14:05"
+
 
 function capture() {
     if ! capture_demand_image; then
@@ -40,6 +46,28 @@ function capture_demand_image() {
     rm -f "$tmpImage"
     return 1
 }
+
+# coordinates captured with the following tool
+# Settings → Developer Options → ✅ Pointer location
+
+function launch_the_app() {
+    # open the app (it's on that location on home screen)
+    timeout 20s adb shell input tap 919 418
+
+    # wait for the app to fully open
+    sleep 58
+
+    # swipe to see precise
+    # adb shell input swipe <Start_X> <Start_Y> <End_X> <End_Y> <Duration_in_ms>
+    timeout 20s adb shell input swipe 421 1882 505 622 794 # a bit random numbers
+}
+
+function kill_the_app() {
+    timeout 20s adb shell input keyevent KEYCODE_APP_SWITCH
+    sleep 5
+    timeout 20s adb shell input tap 511 1881 # tap "Close all"
+}
+
 
 function process_ocr() {
     if ! demand_amount=$(tesseract "$demandImage" stdout 2>> "$debugLogFile" | awk '/Delivery demand/ {print $NF}'); then
@@ -117,6 +145,44 @@ function main() {
     done
 }
 
+function main_with_start_and_end() {
+    # wait for start
+    sleep $(( $(date -d "$startTime" +%s) - $(date +%s) ));
+
+    local end_time=$(date -d "$endTime" +%s)
+
+    adb start-server >/dev/null 2>> "$debugLogFile" || true
+    launch_the_app
+
+    while true; do
+        demand_time=$(date '+%Y-%m-%d_%H-%M-%S')
+
+        if ! capture; then
+            continue
+        fi
+
+        if ! process_match_template; then
+            continue
+        fi
+
+        if ! process_ocr; then
+            sleep 1m
+            continue
+        fi
+
+        # archive
+        cp "$demandImage" "$screenshotLogDir/demand_${demand_time}.png"
+
+        # if time is due, break from the loop
+        if (( $(date +%s) >= end_time )); then
+            kill_the_app
+            break
+        fi
+
+        sleep 1m
+    done
+}
+
 function replay() {
     local screenshot screenshotName
 
@@ -137,5 +203,9 @@ function replay() {
     done < <(find "$screenshotLogDir" -maxdepth 1 -type f -name 'demand_*.png' | sort)
 }
 
-main
-#replay
+if [[ $# -gt 0 ]]; then
+    "$1"
+else
+    main
+fi
+
