@@ -18,6 +18,15 @@ UI screenshot for a busy hot Saturday:
 # Tools needed on host system (tested on ubuntu 26.04)
 ```bash
 sudo apt install -y tesseract-ocr imagemagick adb
+# ubuntu 26.04
+sudo apt install android-udev-rules
+# ubuntu 24.04
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+# test connection
+adb kill-server
+adb start-server
+adb devices # confirm on the phone
 ```
 
 # Pollers

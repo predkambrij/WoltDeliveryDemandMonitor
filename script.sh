@@ -7,6 +7,7 @@ screenshotLogDir="$scriptDir/sslog"
 demandImage="$scriptDir/demand.png"
 
 runTime="$(date '+%Y-%m-%d_%H-%M-%S')"
+mkdir -p "$scriptDir/sslog"
 mkdir -p "$scriptDir/logs"
 debugLogFile="/dev/null" # "$scriptDir/logs/log_ocr_debug_${runTime}.log"
 logOcrFile="$scriptDir/logs/log_ocr_${runTime}.log"
