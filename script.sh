@@ -12,8 +12,10 @@ mkdir -p "$scriptDir/logs"
 debugLogFile="/dev/null" # "$scriptDir/logs/log_ocr_debug_${runTime}.log"
 logOcrFile="$scriptDir/logs/log_ocr_${runTime}.log"
 logMatchFile="$scriptDir/logs/log_match_${runTime}.log"
+logBoostFile="$scriptDir/logs/log_boost_${runTime}.log"
 last_ocr_demand_amount=""
 last_template_match=""
+last_boost=""
 
 startTime="06:40"
 endTime="tomorrow 01:15"
@@ -69,11 +71,35 @@ function kill_the_app() {
 }
 
 
+# The boost card sits between "EARN EXTRA" and "Quick links" and says e.g.
+# "Now - Weather boost / +30% / 14:00-17:00". A boost is active only when the
+# card says "Now"; OCR occasionally mangles that word, in which case we miss
+# one reading, which is fine.
+function process_boost() {
+    local card="$(sed -n '/EARN EXTRA/,/Quick links/p')"
+    local boost
+
+    if ! grep -qw 'Now' <<< "$card" || ! boost=$(grep -m1 -oE '[0-9]{2,3}%' <<< "$card"); then
+        boost="None"
+    fi
+
+    if [[ "$boost" != "$last_boost" ]]; then
+        printf '%s\t%s\n' "$demand_time" "$boost" >> "$logBoostFile"
+        last_boost="$boost"
+    fi
+    return 0
+}
+
 function process_ocr() {
-    if ! demand_amount=$(tesseract "$demandImage" stdout 2>> "$debugLogFile" | awk '/Delivery demand/ {print $NF}'); then
+    local ocr_text
+    if ! ocr_text=$(tesseract "$demandImage" stdout 2>> "$debugLogFile"); then
         printf "%s\tskip: couldn't tesseract\n" "$demand_time"
         return 1
     fi
+
+    process_boost <<< "$ocr_text"
+
+    demand_amount=$(awk '/Delivery demand/ {print $NF}' <<< "$ocr_text")
 
     if [[ -z "$demand_amount" ]]; then
         printf '%s\tskip: zero amount\n' "$demand_time"
@@ -193,6 +219,7 @@ function replay() {
         screenshotName="$(basename "$screenshot")"
         demand_time="${screenshotName#demand_}"
         demand_time="${demand_time%.png}"
+        demand_time="${demand_time% copy}"
 
         cp "$screenshot" "$demandImage"
 
