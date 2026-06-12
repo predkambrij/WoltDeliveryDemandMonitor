@@ -147,7 +147,10 @@ function main() {
 
 function main_with_start_and_end() {
     # wait for start
-    sleep $(( $(date -d "$startTime" +%s) - $(date +%s) ));
+    local wait_seconds=$(( $(date -d "$startTime" +%s) - $(date +%s) ));
+    if (( wait_seconds > 0 )); then
+        sleep $wait_seconds;
+    fi
 
     local end_time=$(date -d "$endTime" +%s)
 
