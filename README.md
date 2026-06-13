@@ -4,8 +4,10 @@ This is mostly a personal project, but it might also come in handy for somebody 
 
 This project collects data from Wolt's courier app (taking periodic screenshots using adb) and then uses OCR and OpenCV's matchTemplate to extract information about current demand. It also collects weather data and displays it as a web page for the selected day. I'm mostly interested in the day's peak and which day of the week makes the most sense (which must also work with my schedule).
 
-Possible improvements:
-- collect "Earn extra" - boosts and display along (announcement time, period of "Earn extra", and an extra % probably has some influence) of the demand for and around that period.
+It also collects boosts (% and period) via OCR and shows them next to demand: solid where actually observed active, dashed for the advertised period. OCR flakiness (false drops, future-boost ghosts) is cleaned up at ingest into clean intervals.
+
+The UI builds an in-memory SQLite from the log files on load (rebuilt on restart, incrementally updated otherwise), then serves a thin API from it. Besides the single-day view there are weekday-comparison pages: `/day_in_a_week` and `/day_in_a_week2` (a demand-by-hour heatmap plus all days smoothed on one chart, with weekday toggles and an adjustable smoothing window).
+Known bad-data windows (e.g. a screen-overlay outage) are hardcoded as blackouts in `ui/ingest.js` and rendered as gaps.
 
 Other notes:
 - UI and UI test are mostly vibe coded, so code quality is slightly lower than what's needed to receive the Nobel price.
