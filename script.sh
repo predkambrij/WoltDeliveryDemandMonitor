@@ -76,11 +76,13 @@ function kill_the_app() {
 # card says "Now"; OCR occasionally mangles that word, in which case we miss
 # one reading, which is fine.
 function process_boost() {
-    local card="$(sed -n '/EARN EXTRA/,/Quick links/p')"
-    local boost
+    local card="$(sed -nE '/EARN EXTRA|Ljubljana/,/Quick links/p')"
+    local boost period
 
     if ! grep -qw 'Now' <<< "$card" || ! boost=$(grep -m1 -oE '[0-9]{2,3}%' <<< "$card"); then
         boost="None"
+    elif period=$(grep -m1 -oE '[0-9]{1,2}:[0-9]{2}-[0-9]{1,2}:[0-9]{2}' <<< "$card"); then
+        boost="$boost $period"
     fi
 
     if [[ "$boost" != "$last_boost" ]]; then

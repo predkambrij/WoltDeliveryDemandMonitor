@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demand by Day of Week</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#17201c",
+              muted: "#67736d",
+              paper: "#fffefa",
+              field: "#f4f1ea",
+              line: "#ddd6cb",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="min-w-[320px] bg-field text-ink">
+    <main class="min-h-screen w-full px-4 py-5 sm:px-6 lg:px-8">
+      <header class="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 class="text-xl font-black uppercase tracking-widest text-muted sm:text-2xl">Demand by Day of Week</h1>
+          <p class="mt-1 text-sm font-bold text-muted">Same weekday overlaid across weeks · one color per date</p>
+        </div>
+        <a href="/" class="rounded-lg border border-line bg-paper px-4 py-2 text-sm font-black text-muted shadow-sm hover:text-ink">← Single day view</a>
+      </header>
+
+      <div class="mb-4 flex items-center gap-2 rounded-lg border border-line bg-paper px-4 py-3 shadow-sm">
+        <label class="flex items-center gap-2 text-xs font-black text-muted">Smoothing
+          <input id="smooth" type="range" min="0" max="12" value="3" class="accent-ink">
+          <span id="smoothVal" class="tabular-nums text-ink">±15m</span>
+        </label>
+        <span class="text-xs font-bold text-muted">· applies to the precise curves</span>
+      </div>
+
+      <div id="weekdays" class="grid gap-4"></div>
+    </main>
+
+    <script src="./week.js"></script>
+  </body>
+</html>

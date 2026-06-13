@@ -47,8 +47,14 @@ function xFor(time) {
 }
 
 function zonedNow(timeZone) {
+  let zone = timeZone;
+  try {
+    new Intl.DateTimeFormat("en-CA", { timeZone: zone });
+  } catch {
+    zone = undefined; // e.g. "unknown" when a day has no weather logs
+  }
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
+    timeZone: zone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -212,6 +218,7 @@ function renderPreciseRow(day, endX) {
   const bottomPad = 28;
 
   const blocks = day.precise.map((item, index) => {
+    if (item.level === null || item.level === undefined) return ""; // blackout gap: draw nothing
     const next = day.precise[index + 1];
     const start = xFor(item.time);
     const end = next ? xFor(next.time) : endX;
@@ -241,6 +248,50 @@ function renderPreciseRow(day, endX) {
   `;
 
   return rowShell("Precise", "Matched y_top level", chart, 152, preciseVisual);
+}
+
+function boostColor(percent) {
+  const heat = Math.min(1, Math.max(0, percent / 80));
+  return `hsl(268 65% ${68 - heat * 30}%)`;
+}
+
+function renderBoostRow(day) {
+  const boostVisual = `<span class="inline-flex h-2 gap-px overflow-hidden rounded-sm"><span class="w-3" style="background:${boostColor(20)}"></span><span class="w-3" style="background:${boostColor(40)}"></span><span class="w-3" style="background:${boostColor(60)}"></span><span class="w-3" style="background:${boostColor(80)}"></span></span>`;
+  const intervals = day.boost || [];
+  const advertised = day.boost_advertised || [];
+  if (!intervals.length && !advertised.length) {
+    return rowShell("Boost", "Earnings boost intervals", emptyState("No boost log for this date"), 124, boostVisual);
+  }
+
+  const chartTop = 34;
+  const chartHeight = 74;
+
+  const advertisedBlocks = advertised.map((item) => {
+    const start = xFor(item.start);
+    const width = Math.max(2, xFor(item.end) - start);
+    const color = boostColor(item.percent);
+    return `
+      <article class="absolute flex items-center overflow-hidden rounded-md border-2 border-dashed px-2" data-boost-advertised title="Advertised +${item.percent}% for ${item.period} · seen ${item.seen_from}${item.seen_to !== item.seen_from ? ` to ${item.seen_to}` : ""}" style="top:6px; height:22px; left:${start}px; width:${width}px; border-color:${color}; color:${color}">
+        <span class="truncate text-[10px] font-black">+${item.percent}% advertised</span>
+      </article>
+    `;
+  }).join("");
+
+  const blocks = intervals.map((item) => {
+    const start = xFor(item.start);
+    const width = Math.max(2, xFor(item.end) - start);
+    const barHeight = Math.round(24 + Math.min(1, item.percent / 100) * (chartHeight - 24));
+    const top = chartTop + chartHeight - barHeight;
+    const color = boostColor(item.percent);
+    const compact = width < 110;
+    return `
+      <article class="absolute overflow-hidden shadow-sm" data-boost-block title="+${item.percent}% · ${item.start}–${item.end} · advertised ${item.period || "n/a"}" style="left:${start}px; width:${width}px; top:${top}px; height:${barHeight}px; background:${color}">
+        <span class="absolute left-1 top-1 max-w-full truncate rounded px-1.5 py-0.5 text-[11px] font-black text-white" style="background:rgb(0 0 0 / .14)">+${item.percent}%${compact ? "" : ` · ${item.start}–${item.end}`}</span>
+      </article>
+    `;
+  }).join("");
+
+  return rowShell("Boost", "Solid observed · dashed advertised", `${advertisedBlocks}${blocks}`, chartTop + chartHeight + 10, boostVisual);
 }
 
 function weatherCard(item, kind, top = 16) {
@@ -400,6 +451,7 @@ async function renderDay(date) {
     renderSunRow(day),
     renderDemandRow(day, endX),
     renderPreciseRow(day, endX),
+    renderBoostRow(day),
     renderForecastRow(day),
     renderActualRow(day),
   ].join("");
@@ -418,8 +470,10 @@ async function init() {
 
   daySelect.innerHTML = days.map((item) => `<option value="${item.date}">${item.label}</option>`).join("");
   daySelect.addEventListener("change", (event) => renderDay(event.target.value));
-  await renderDay(days[days.length - 1].date);
-  daySelect.value = days[days.length - 1].date;
+  const requested = new URLSearchParams(location.search).get("date");
+  const initialDate = days.some((item) => item.date === requested) ? requested : days[days.length - 1].date;
+  await renderDay(initialDate);
+  daySelect.value = initialDate;
 }
 
 init().catch((error) => {
